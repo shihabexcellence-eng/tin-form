@@ -575,7 +575,7 @@ textarea{resize:vertical;min-height:70px}
   <div class="section" id="step-6">
     <div class="section-title"><span class="icon">📎</span> Supporting Documents <span class="step-indicator">Step 6 of 7</span></div>
 
-    <div class="warning-box">⚠️ NIC front and back copies are <strong>mandatory</strong> for TIN registration. Please upload clear, readable scans or photos. Maximum file size: 5MB per image. Accepted formats: JPG, PNG, PDF.</div>
+    <div class="note-box">📸 Please upload your NIC photos below if possible. If you cannot upload, no problem — simply <strong>WhatsApp your NIC front and back photos to 0XX XXX XXXX</strong> after submitting this form, mentioning your name and NIC number.</div>
 
     <!-- NIC Upload -->
     <div class="subsection-label">🪪 National Identity Card (NIC)</div>
@@ -682,9 +682,13 @@ textarea{resize:vertical;min-height:70px}
   <div class="confirm-screen" id="confirm-screen">
     <div class="check-circle">✅</div>
     <h2>Application Details Submitted!</h2>
-    <p>Thank you. The client's TIN registration information has been recorded successfully.<br>
-    Our team will proceed with the IRD application and contact the client via the provided email or phone number.</p>
+    <p>Thank you. Your TIN registration information has been recorded successfully.<br>
+    We will proceed with the IRD application and contact you via your provided email or phone number.</p>
     <p style="margin-top:16px;font-size:13px;color:#840D32;font-weight:600">Reference: TIN-<span id="ref-number"></span></p>
+    <div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:16px;margin-top:20px;text-align:left">
+      <p style="font-size:14px;font-weight:600;color:#856404;margin:0 0 8px">📱 One more step required!</p>
+      <p style="font-size:13px;color:#856404;margin:0">Please <strong>WhatsApp your NIC front and back photos</strong> to <strong>+94 XX XXX XXXX</strong> with your name and reference number <strong>TIN-<span class="ref-inline"></span></strong>. Your application cannot be processed without the NIC copies.</p>
+    </div>
     <div style="margin-top:24px;display:flex;gap:12px;justify-content:center">
       <button class="btn btn-print" onclick="window.print()">🖨️ Print a Copy</button>
       <button class="btn btn-next" onclick="resetForm()">New Application</button>
@@ -763,10 +767,7 @@ function validateStep(n){
     if(!hasContact) err.push('At least one contact number');
     if(!v('email')) err.push('Email address');
   }
-  if(n===6){
-    if(!uploadedFiles['nic-front']) err.push('NIC front image');
-    if(!uploadedFiles['nic-back']) err.push('NIC back image');
-  }
+  // Step 6: NIC upload optional - client sends photos via WhatsApp
   if(err.length){
     alert('Please fill in the following required fields:\n• '+err.join('\n• '));
     return false;
@@ -1032,12 +1033,8 @@ function submitForm(){
   }
 
   // NIC images
-  var nicFrontInput=document.getElementById('nic_front');
-  var nicBackInput=document.getElementById('nic_back');
-  var docExtraInput=document.getElementById('doc_extra');
-  if(nicFrontInput && nicFrontInput.files[0]) formData.append('NIC_Front', nicFrontInput.files[0], 'NIC_Front_'+gv('nic')+'.jpg');
-  if(nicBackInput && nicBackInput.files[0]) formData.append('NIC_Back', nicBackInput.files[0], 'NIC_Back_'+gv('nic')+'.jpg');
-  if(docExtraInput && docExtraInput.files[0]) formData.append('Additional_Document', docExtraInput.files[0]);
+  // File uploads not included (free plan) - client sends NIC photos via WhatsApp
+  formData.append('NIC_Photos_Instructions', 'Client will send NIC front and back via WhatsApp');
 
   fetch('https://formspree.io/f/mlgkzenk', {
     method:'POST',
@@ -1051,6 +1048,7 @@ function submitForm(){
       var screen=document.getElementById('confirm-screen');
       screen.className='confirm-screen show';
       document.getElementById('ref-number').textContent=refNo;
+  document.querySelectorAll('.ref-inline').forEach(function(el){el.textContent=refNo;});
       window.scrollTo({top:0,behavior:'smooth'});
     } else {
       response.json().then(function(data){
